@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import { pipelinesApi, dealsApi, type Pipeline, type KanbanStage, type User } from '@/lib/api';
+import { pipelinesApi, dealsApi, clientsApi, type Pipeline, type KanbanStage, type User, type Client } from '@/lib/api';
 
 export default function KanbanPage() {
   const router = useRouter();
@@ -13,6 +13,16 @@ export default function KanbanPage() {
   const [stages, setStages] = useState<KanbanStage[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggingDealId, setDraggingDealId] = useState<number | null>(null);
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [formData, setFormData] = useState({
+    title: '',
+    client_id: '',
+    amount: '',
+    description: '',
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -26,6 +36,7 @@ export default function KanbanPage() {
     try {
       setUser(JSON.parse(userData));
       loadPipelines();
+      loadClients();
     } catch (error) {
       router.push('/login');
     }
@@ -44,6 +55,15 @@ export default function KanbanPage() {
     }
   };
 
+  const loadClients = async () => {
+    try {
+      const data = await clientsApi.list();
+      setClients(data);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+    }
+  };
+
   const loadKanban = async (pipelineId: number) => {
     setLoading(true);
     try {
@@ -59,6 +79,35 @@ export default function KanbanPage() {
   const handlePipelineChange = (pipelineId: number) => {
     setSelectedPipeline(pipelineId);
     loadKanban(pipelineId);
+  };
+
+  const handleCreateDeal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedPipeline || stages.length === 0) {
+      alert('Выберите воронку');
+      return;
+    }
+
+    try {
+      await dealsApi.create({
+        title: formData.title,
+        client_id: Number(formData.client_id),
+        amount: Number(formData.amount),
+        description: formData.description || undefined,
+        pipeline_id: selectedPipeline,
+        stage_id: stages[0].stage_id, // Первая стадия
+        currency: 'RUB',
+        status: 'open',
+      });
+
+      setShowModal(false);
+      setFormData({ title: '', client_id: '', amount: '', description: '' });
+      loadKanban(selectedPipeline);
+    } catch (error) {
+      console.error('Error creating deal:', error);
+      alert('Ошибка создания сделки');
+    }
   };
 
   const handleDragStart = (dealId: number) => {
@@ -120,7 +169,7 @@ export default function KanbanPage() {
               </select>
             </div>
             
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
               + Новая сделка
             </button>
           </div>
@@ -175,6 +224,108 @@ export default function KanbanPage() {
           </div>
         </div>
       </div>
+
+      {/* Модалка создания сделки */}
+      {showModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="card"
+            style={{ width: '500px', maxHeight: '90vh', overflow: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+              Новая сделка
+            </h3>
+
+            <form onSubmit={handleCreateDeal} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label className="block mb-1.5 text-sm font-medium">Название *</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Например: Контекстная реклама"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm font-medium">Клиент *</label>
+                <select
+                  className="input"
+                  value={formData.client_id}
+                  onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
+                  required
+                >
+                  <option value="">Выберите клиента</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm font-medium">Сумма (₽) *</label>
+                <input
+                  type="number"
+                  className="input"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  placeholder="50000"
+                  min="0"
+                  step="1000"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm font-medium">Описание</label>
+                <textarea
+                  className="input"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Дополнительная информация..."
+                />
+              </div>
+
+              <div className="text-sm" style={{ color: 'var(--text-muted)', padding: '8px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
+                ℹ️ Сделка будет создана в первой стадии: <strong>{stages[0]?.stage_name}</strong>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Отмена
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Создать
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
