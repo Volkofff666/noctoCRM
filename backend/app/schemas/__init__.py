@@ -1,5 +1,5 @@
 from .user import UserCreate, UserUpdate, UserResponse, Token
-from .client import ClientCreate, ClientUpdate, ClientResponse, ContactCreate, ContactResponse
+from .client import ClientCreate, ClientUpdate, ClientResponse
 from .deal import (
     PipelineCreate, PipelineUpdate, PipelineResponse,
     DealStageCreate, DealStageUpdate, DealStageResponse,
@@ -10,7 +10,7 @@ from .activity import ActivityCreate, ActivityResponse
 
 __all__ = [
     'UserCreate', 'UserUpdate', 'UserResponse', 'Token',
-    'ClientCreate', 'ClientUpdate', 'ClientResponse', 'ContactCreate', 'ContactResponse',
+    'ClientCreate', 'ClientUpdate', 'ClientResponse',
     'PipelineCreate', 'PipelineUpdate', 'PipelineResponse',
     'DealStageCreate', 'DealStageUpdate', 'DealStageResponse',
     'DealCreate', 'DealUpdate', 'DealResponse', 'DealMove',
