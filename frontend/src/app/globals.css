@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brutal-black: #0A0A0A;
+  --brutal-white: #F5F5F5;
+  --brutal-gray: #D4D4D4;
+  --brutal-accent: #FF6B35;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background: var(--brutal-black);
+  color: var(--brutal-white);
+  line-height: 1.6;
+}
+
+/* === BRUTALISM STYLE === */
+.brutal-box {
+  border: 3px solid var(--brutal-white);
+  background: var(--brutal-black);
+  box-shadow: 8px 8px 0 var(--brutal-white);
+  transition: all 0.2s;
+}
+
+.brutal-box:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0 var(--brutal-white);
+}
+
+/* === GLASSMORPHISM === */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* === BUTTONS === */
+.brutal-button {
+  border: 3px solid var(--brutal-white);
+  background: var(--brutal-accent);
+  color: var(--brutal-white);
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 var(--brutal-white);
+  font-family: 'Courier New', monospace;
+}
+
+.brutal-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--brutal-white);
+}
+
+.brutal-button:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0 var(--brutal-white);
+}
+
+.brutal-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.brutal-button-secondary {
+  background: transparent;
+  border: 3px solid var(--brutal-white);
+  color: var(--brutal-white);
+}
+
+/* === INPUTS === */
+.brutal-input {
+  border: 3px solid var(--brutal-white);
+  background: var(--brutal-black);
+  color: var(--brutal-white);
+  padding: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.brutal-input:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--brutal-accent);
+  transform: translate(-2px, -2px);
+}
+
+.brutal-input::placeholder {
+  color: var(--brutal-gray);
+}
+
+/* === KANBAN === */
+.kanban-column {
+  min-width: 320px;
+  max-width: 320px;
+}
+
+.kanban-card {
+  cursor: grab;
+  user-select: none;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card.dragging {
+  opacity: 0.5;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brutal-black);
+  border: 2px solid var(--brutal-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brutal-accent);
+  border: 2px solid var(--brutal-white);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brutal-white);
+}
