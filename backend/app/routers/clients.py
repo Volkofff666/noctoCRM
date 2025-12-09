@@ -10,6 +10,31 @@ from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 
 router = APIRouter(prefix="/api/clients", tags=["clients"])
 
+# IMPORTANT: Статические роуты ДОЛЖНЫ быть ВЫШЕ динамических!
+@router.get("/stats/summary")
+def get_clients_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Статистика по клиентам"""
+    query = db.query(Client)
+    
+    # Менеджеры видят только своих
+    if current_user.role == "manager":
+        query = query.filter(Client.manager_id == current_user.id)
+    
+    total = query.count()
+    leads = query.filter(Client.status == "lead").count()
+    clients = query.filter(Client.status == "client").count()
+    archived = query.filter(Client.status == "archive").count()
+    
+    return {
+        "total": total,
+        "leads": leads,
+        "clients": clients,
+        "archived": archived,
+    }
+
 @router.get("/", response_model=List[ClientResponse])
 def list_clients(
     status: Optional[str] = None,
@@ -121,27 +146,3 @@ def delete_client(
     db.delete(db_client)
     db.commit()
     return {"message": "Client deleted"}
-
-@router.get("/stats/summary")
-def get_clients_stats(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Статистика по клиентам"""
-    query = db.query(Client)
-    
-    # Менеджеры видят только своих
-    if current_user.role == "manager":
-        query = query.filter(Client.manager_id == current_user.id)
-    
-    total = query.count()
-    leads = query.filter(Client.status == "lead").count()
-    clients = query.filter(Client.status == "client").count()
-    archived = query.filter(Client.status == "archive").count()
-    
-    return {
-        "total": total,
-        "leads": leads,
-        "clients": clients,
-        "archived": archived,
-    }
