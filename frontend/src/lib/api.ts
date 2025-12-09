@@ -55,6 +55,23 @@ export interface LoginResponse {
   token_type: string;
 }
 
+export interface Client {
+  id: number;
+  name: string;
+  inn?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  source?: string;
+  status: string;
+  manager_id?: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  last_contact: string;
+}
+
 export interface Pipeline {
   id: number;
   name: string;
@@ -122,6 +139,43 @@ export const authApi = {
   
   getMe: async (): Promise<User> => {
     const response = await api.get('/api/auth/me');
+    return response.data;
+  },
+};
+
+// ========== CLIENTS API ==========
+
+export const clientsApi = {
+  list: async (filters?: {
+    status?: string;
+    search?: string;
+    manager_id?: number;
+  }): Promise<Client[]> => {
+    const response = await api.get('/api/clients', { params: filters });
+    return response.data;
+  },
+  
+  create: async (client: Partial<Client>): Promise<Client> => {
+    const response = await api.post('/api/clients', client);
+    return response.data;
+  },
+  
+  update: async (id: number, client: Partial<Client>): Promise<Client> => {
+    const response = await api.put(`/api/clients/${id}`, client);
+    return response.data;
+  },
+  
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/clients/${id}`);
+  },
+  
+  getStats: async (): Promise<{
+    total: number;
+    leads: number;
+    clients: number;
+    archived: number;
+  }> => {
+    const response = await api.get('/api/clients/stats/summary');
     return response.data;
   },
 };

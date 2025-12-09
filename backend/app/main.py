@@ -8,6 +8,7 @@ from app.models import User, Client, Contact, Deal, DealStage, Pipeline, Task, A
 
 # Импортируем роутеры
 from app.routers import auth_router, pipelines_router, deals_router
+from app.routers.clients import router as clients_router
 
 # Создание таблиц
 Base.metadata.create_all(bind=engine)
@@ -32,6 +33,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(pipelines_router)
 app.include_router(deals_router)
+app.include_router(clients_router)
 
 @app.get("/")
 def root():
