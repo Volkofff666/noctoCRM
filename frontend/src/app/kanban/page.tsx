@@ -93,26 +93,27 @@ export default function KanbanPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-bold uppercase">ЗАГРУЗКА...</div>
+        <div className="text-lg" style={{ color: 'var(--text-secondary)' }}>Загрузка...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
       {/* Header */}
-      <header className="brutal-box p-4 mb-6">
-        <div className="container mx-auto flex justify-between items-center">
+      <header className="header">
+        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--brutal-accent)' }}>
-              NOCTOCRM
+            <h1 className="text-xl font-semibold" style={{ color: 'var(--accent)' }}>
+              noctoCRM
             </h1>
             
             {/* Pipeline Selector */}
             <select
               value={selectedPipeline || ''}
               onChange={(e) => handlePipelineChange(Number(e.target.value))}
-              className="brutal-input w-64"
+              className="input"
+              style={{ width: '250px' }}
             >
               {pipelines.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -122,21 +123,25 @@ export default function KanbanPage() {
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="font-bold uppercase">{user?.full_name}</p>
-              <p className="text-sm text-brutal-gray uppercase">{user?.role}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                {user?.full_name}
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                {user?.role === 'admin' ? 'Администратор' : user?.role === 'manager' ? 'Менеджер' : 'Сотрудник'}
+              </p>
             </div>
             <button
               onClick={handleLogout}
-              className="brutal-button-secondary"
+              className="btn btn-secondary"
             >
-              ВЫЙТИ
+              Выйти
             </button>
           </div>
         </div>
       </header>
 
       {/* Kanban Board */}
-      <div className="container mx-auto px-4">
+      <div className="max-w-screen-2xl mx-auto px-6 py-6">
         <div className="flex gap-4 overflow-x-auto pb-4">
           {stages.map(stage => (
             <div
@@ -146,14 +151,13 @@ export default function KanbanPage() {
               onDrop={() => handleDrop(stage.stage_id)}
             >
               {/* Column Header */}
-              <div
-                className="glass-card p-4 mb-4"
-                style={{ borderTop: `4px solid ${stage.color}` }}
-              >
-                <h3 className="font-bold uppercase text-lg mb-2">{stage.stage_name}</h3>
-                <div className="flex justify-between text-sm text-brutal-gray">
-                  <span>{stage.deals_count} сделок</span>
-                  <span>{stage.total_amount.toLocaleString('ru-RU')} ₽</span>
+              <div className="card mb-3" style={{ borderTop: `3px solid ${stage.color}` }}>
+                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                  {stage.stage_name}
+                </h3>
+                <div className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <span>{stage.deals_count} сд.</span>
+                  <span className="font-medium">{stage.total_amount.toLocaleString('ru-RU')} ₽</span>
                 </div>
               </div>
 
@@ -164,18 +168,20 @@ export default function KanbanPage() {
                     key={deal.id}
                     draggable
                     onDragStart={() => handleDragStart(deal.id)}
-                    className={`brutal-box p-4 kanban-card ${
+                    className={`card kanban-card ${
                       draggingDealId === deal.id ? 'dragging' : ''
                     }`}
                   >
-                    <h4 className="font-bold mb-2">{deal.title}</h4>
-                    <div className="text-sm text-brutal-gray">
-                      <p className="font-bold" style={{ color: 'var(--brutal-accent)' }}>
+                    <h4 className="font-medium mb-2" style={{ color: 'var(--text-primary)', fontSize: '14px' }}>
+                      {deal.title}
+                    </h4>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
                         {deal.amount.toLocaleString('ru-RU')} {deal.currency}
-                      </p>
-                      <p className="text-xs mt-1">
-                        ID клиента: {deal.client_id}
-                      </p>
+                      </span>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        ID: {deal.client_id}
+                      </span>
                     </div>
                   </div>
                 ))}
