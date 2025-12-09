@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
 import { pipelinesApi, dealsApi, type Pipeline, type KanbanStage, type User } from '@/lib/api';
 
 export default function KanbanPage() {
@@ -84,110 +85,94 @@ export default function KanbanPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/login');
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg" style={{ color: 'var(--text-secondary)' }}>Загрузка...</div>
+      <div className="flex">
+        <Sidebar user={user} />
+        <div className="flex-1" style={{ marginLeft: '240px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="text-lg" style={{ color: 'var(--text-secondary)' }}>Загрузка...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
-      {/* Header */}
-      <header className="header">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-semibold" style={{ color: 'var(--accent)' }}>
-              noctoCRM
-            </h1>
-            
-            {/* Pipeline Selector */}
-            <select
-              value={selectedPipeline || ''}
-              onChange={(e) => handlePipelineChange(Number(e.target.value))}
-              className="input"
-              style={{ width: '250px' }}
-            >
-              {pipelines.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                {user?.full_name}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                {user?.role === 'admin' ? 'Администратор' : user?.role === 'manager' ? 'Менеджер' : 'Сотрудник'}
-              </p>
+    <div className="flex">
+      <Sidebar user={user} />
+      
+      <div className="flex-1" style={{ marginLeft: '240px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+        {/* Header */}
+        <header className="header" style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+          <div className="px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Воронка продаж
+              </h2>
+              <select
+                value={selectedPipeline || ''}
+                onChange={(e) => handlePipelineChange(Number(e.target.value))}
+                className="input"
+                style={{ width: '200px' }}
+              >
+                {pipelines.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </div>
-            <button
-              onClick={handleLogout}
-              className="btn btn-secondary"
-            >
-              Выйти
+            
+            <button className="btn btn-primary">
+              + Новая сделка
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Kanban Board */}
-      <div className="max-w-screen-2xl mx-auto px-6 py-6">
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {stages.map(stage => (
-            <div
-              key={stage.stage_id}
-              className="kanban-column"
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(stage.stage_id)}
-            >
-              {/* Column Header */}
-              <div className="card mb-3" style={{ borderTop: `3px solid ${stage.color}` }}>
-                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  {stage.stage_name}
-                </h3>
-                <div className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  <span>{stage.deals_count} сд.</span>
-                  <span className="font-medium">{stage.total_amount.toLocaleString('ru-RU')} ₽</span>
+        {/* Kanban Board */}
+        <div className="px-6 py-6">
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {stages.map(stage => (
+              <div
+                key={stage.stage_id}
+                className="kanban-column"
+                onDragOver={handleDragOver}
+                onDrop={() => handleDrop(stage.stage_id)}
+              >
+                <div className="card mb-3" style={{ borderTop: `3px solid ${stage.color}` }}>
+                  <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                    {stage.stage_name}
+                  </h3>
+                  <div className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <span>{stage.deals_count} сд.</span>
+                    <span className="font-medium">{stage.total_amount.toLocaleString('ru-RU')} ₽</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {stage.deals.map(deal => (
+                    <div
+                      key={deal.id}
+                      draggable
+                      onDragStart={() => handleDragStart(deal.id)}
+                      className={`card kanban-card ${
+                        draggingDealId === deal.id ? 'dragging' : ''
+                      }`}
+                    >
+                      <h4 className="font-medium mb-2" style={{ color: 'var(--text-primary)', fontSize: '14px' }}>
+                        {deal.title}
+                      </h4>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                          {deal.amount.toLocaleString('ru-RU')} {deal.currency}
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          ID: {deal.client_id}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {/* Deals */}
-              <div className="space-y-3">
-                {stage.deals.map(deal => (
-                  <div
-                    key={deal.id}
-                    draggable
-                    onDragStart={() => handleDragStart(deal.id)}
-                    className={`card kanban-card ${
-                      draggingDealId === deal.id ? 'dragging' : ''
-                    }`}
-                  >
-                    <h4 className="font-medium mb-2" style={{ color: 'var(--text-primary)', fontSize: '14px' }}>
-                      {deal.title}
-                    </h4>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
-                        {deal.amount.toLocaleString('ru-RU')} {deal.currency}
-                      </span>
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        ID: {deal.client_id}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
