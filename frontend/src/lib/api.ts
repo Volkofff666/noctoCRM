@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Добавляем токен к каждому запросу
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
@@ -20,7 +19,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Обработка 401 ошибки
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -121,6 +119,41 @@ export interface KanbanStage {
   deals: Deal[];
 }
 
+export interface DashboardStats {
+  deals: {
+    total: number;
+    open: number;
+    won: number;
+    lost: number;
+  };
+  revenue: {
+    total: number;
+    month: number;
+  };
+  clients: {
+    total: number;
+    leads: number;
+    clients: number;
+  };
+  tasks: {
+    total: number;
+    pending: number;
+    completed: number;
+  };
+  conversion_rate: number;
+}
+
+export interface Activity {
+  id: number;
+  type: string;
+  subject: string;
+  content: string;
+  created_at: string;
+  user_id: number;
+  deal_id?: number;
+  client_id?: number;
+}
+
 // ========== AUTH API ==========
 
 export const authApi = {
@@ -139,6 +172,34 @@ export const authApi = {
   
   getMe: async (): Promise<User> => {
     const response = await api.get('/api/auth/me');
+    return response.data;
+  },
+};
+
+// ========== DASHBOARD API ==========
+
+export const dashboardApi = {
+  getStats: async (): Promise<DashboardStats> => {
+    const response = await api.get('/api/dashboard/stats');
+    return response.data;
+  },
+  
+  getRecentActivities: async (limit: number = 10): Promise<Activity[]> => {
+    const response = await api.get('/api/dashboard/recent-activities', {
+      params: { limit },
+    });
+    return response.data;
+  },
+  
+  getSalesChart: async (days: number = 30) => {
+    const response = await api.get('/api/dashboard/sales-chart', {
+      params: { days },
+    });
+    return response.data;
+  },
+  
+  getPipelineStats: async () => {
+    const response = await api.get('/api/dashboard/pipeline-stats');
     return response.data;
   },
 };

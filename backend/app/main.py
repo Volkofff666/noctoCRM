@@ -9,6 +9,7 @@ from app.models import User, Client, Contact, Deal, DealStage, Pipeline, Task, A
 # Импортируем роутеры
 from app.routers import auth_router, pipelines_router, deals_router
 from app.routers.clients import router as clients_router
+from app.routers.dashboard import router as dashboard_router
 
 # Создание таблиц
 Base.metadata.create_all(bind=engine)
@@ -34,6 +35,7 @@ app.include_router(auth_router)
 app.include_router(pipelines_router)
 app.include_router(deals_router)
 app.include_router(clients_router)
+app.include_router(dashboard_router)
 
 @app.get("/")
 def root():
