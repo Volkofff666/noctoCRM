@@ -102,7 +102,7 @@ export default function KanbanPage() {
       
       <div className="flex-1" style={{ marginLeft: '240px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
         {/* Header */}
-        <header className="header" style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+        <header className="header">
           <div className="px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
