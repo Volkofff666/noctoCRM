@@ -7,9 +7,7 @@ from app.config import settings
 from app.models import User, Client, Contact, Deal, DealStage, Pipeline, Task, Activity
 
 # Импортируем роутеры
-from app.routers import auth_router, pipelines_router, deals_router
-from app.routers.clients import router as clients_router
-from app.routers.dashboard import router as dashboard_router
+from app.routers import auth_router, pipelines_router, deals_router, dashboard_router, clients_router
 
 # Создание таблиц
 Base.metadata.create_all(bind=engine)
