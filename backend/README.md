@@ -24,13 +24,30 @@ cp .env.example .env
 # Отредактируйте .env
 ```
 
-## Создание админа
+## Быстрый старт
+
+### 1. Создайте админа
 
 ```bash
 python create_admin.py
 ```
 
-## Запуск
+### 2. Создайте воронку продаж
+
+```bash
+python init_pipeline.py
+```
+
+Это создаст стандартную воронку со стадиями:
+- Новый лид
+- Квалификация
+- Коммерческое предложение
+- Переговоры
+- Договор
+- Успешно закрыто
+- Проиграно
+
+### 3. Запустите сервер
 
 ```bash
 uvicorn app.main:app --reload
@@ -44,25 +61,118 @@ uvicorn app.main:app --reload
 backend/
 ├── app/
 │   ├── models/        # Модели БД
+│   │   ├── user.py
+│   │   ├── client.py
+│   │   ├── deal.py      # Pipeline, Stage, Deal
+│   │   ├── task.py
+│   │   └── activity.py
 │   ├── schemas/       # Pydantic схемы
 │   ├── routers/       # API роутеры
-│   ├── crud/          # CRUD операции
+│   │   ├── auth.py
+│   │   ├── pipelines.py  # Воронки + стадии
+│   │   └── deals.py      # Сделки + Kanban
 │   ├── auth.py        # Аутентификация
 │   ├── config.py      # Настройки
 │   ├── database.py    # БД
 │   └── main.py        # Точка входа
 ├── create_admin.py
+├── init_pipeline.py
 ├── requirements.txt
 └── .env.example
 ```
 
 ## Модели данных
 
+### Основные:
 - **User** - пользователи системы
 - **Client** - клиенты (компании)
 - **Contact** - контактные лица
-- **Pipeline** - воронки продаж
+
+### Воронка продаж:
+- **Pipeline** - воронки продаж (можно несколько)
 - **DealStage** - стадии сделок
 - **Deal** - сделки
+
+### Дополнительно:
 - **Task** - задачи
 - **Activity** - история взаимодействий
+
+## API эндпоинты
+
+### Авторизация
+- `POST /api/auth/login` - вход
+- `GET /api/auth/me` - текущий пользователь
+
+### Воронки
+- `GET /api/pipelines` - список воронок
+- `POST /api/pipelines` - создать воронку (админ)
+- `GET /api/pipelines/{id}` - получить воронку
+- `PUT /api/pipelines/{id}` - обновить воронку (админ)
+
+### Стадии
+- `GET /api/pipelines/{id}/stages` - стадии воронки
+- `POST /api/pipelines/{id}/stages` - создать стадию (админ)
+- `PUT /api/pipelines/stages/{id}` - обновить стадию (админ)
+- `DELETE /api/pipelines/stages/{id}` - удалить стадию (админ)
+
+### Сделки
+- `GET /api/deals` - список сделок (с фильтрами)
+- `POST /api/deals` - создать сделку
+- `GET /api/deals/{id}` - получить сделку
+- `PUT /api/deals/{id}` - обновить сделку
+- `DELETE /api/deals/{id}` - удалить сделку
+- `POST /api/deals/{id}/move` - **переместить сделку (Kanban)**
+- `GET /api/deals/stats/pipeline` - статистика для Kanban
+
+## Пример использования
+
+### 1. Вход
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin&password=your_password"
+```
+
+### 2. Получить воронку для Kanban
+
+```bash
+curl "http://127.0.0.1:8000/api/deals/stats/pipeline?pipeline_id=1" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Ответ:
+```json
+[
+  {
+    "stage_id": 1,
+    "stage_name": "Новый лид",
+    "color": "#94A3B8",
+    "deals_count": 5,
+    "total_amount": 150000,
+    "deals": [
+      {
+        "id": 1,
+        "title": "Контекстная реклама для IT-компании",
+        "amount": 50000,
+        "client_id": 1
+      }
+    ]
+  }
+]
+```
+
+### 3. Переместить сделку (Drag & Drop)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/deals/1/move" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"stage_id": 2}'
+```
+
+## Роли пользователей
+
+- **admin** - полный доступ
+- **manager** - видит только свои сделки
+- **employee** - ограниченный доступ
