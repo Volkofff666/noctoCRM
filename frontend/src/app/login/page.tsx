@@ -37,44 +37,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="glass-card p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-2" style={{ color: 'var(--brutal-accent)' }}>
-            NOCTOCRM
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-secondary)' }}>
+      <div className="card w-full max-w-md">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--accent)' }}>
+            noctoCRM
           </h1>
-          <p className="text-brutal-gray text-sm uppercase tracking-wider">
-            Воронка продаж
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Система управления продажами
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block mb-2 text-sm font-bold uppercase">
-              USERNAME
+            <label htmlFor="username" className="block mb-1.5 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              Имя пользователя
             </label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="brutal-input"
-              placeholder="Введите username"
+              className="input"
+              placeholder="Введите логин"
               required
               disabled={loading}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block mb-2 text-sm font-bold uppercase">
-              PASSWORD
+            <label htmlFor="password" className="block mb-1.5 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              Пароль
             </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="brutal-input"
+              className="input"
               placeholder="Введите пароль"
               required
               disabled={loading}
@@ -82,17 +82,17 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="brutal-box p-3 bg-red-900/20">
-              <p className="text-red-400 text-sm font-bold">{error}</p>
+            <div className="p-3 rounded-md" style={{ background: 'rgba(220, 53, 69, 0.1)', border: '1px solid var(--danger)' }}>
+              <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>
             </div>
           )}
 
           <button
             type="submit"
-            className="brutal-button w-full"
+            className="btn btn-primary w-full"
             disabled={loading}
           >
-            {loading ? 'ЗАГРУЗКА...' : 'ВОЙТИ'}
+            {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
       </div>
